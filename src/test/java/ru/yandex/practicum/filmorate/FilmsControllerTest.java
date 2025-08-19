@@ -24,7 +24,7 @@ class FilmsControllerTest {
     }
 
     @Test
-    void testGetBasePathOk() throws Exception {
+    void testGetBasePathOk() {
         Assertions.assertTrue(this.restTemplate
                 .getForEntity("http://localhost:" + port + "/films", String.class)
                 .getStatusCode()
@@ -32,7 +32,7 @@ class FilmsControllerTest {
     }
 
     @Test
-    void testPostFilmOk() throws Exception {
+    void testPostFilmOk() {
         Film film = new Film();
         film.setName("testf");
         film.setDuration(30);
@@ -43,7 +43,7 @@ class FilmsControllerTest {
     }
 
     @Test
-    void testUpdateFilmOk() throws Exception {
+    void testUpdateFilmOk() {
         Film film = new Film();
         film.setName("testf");
         film.setDuration(30);
@@ -64,6 +64,65 @@ class FilmsControllerTest {
                 Film.class);
         Assertions.assertEquals(HttpStatus.OK, responseUpdates.getStatusCode());
         Assertions.assertEquals(film.getName(), responseUpdates.getBody().getName());
+    }
+
+    @Test
+    void testUpdateFilmWhichWasntAddedFail() {
+        Film film = new Film();
+        film.setName("testf");
+        film.setDuration(30);
+        film.setReleaseDate(LocalDate.now());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Film> requestEntity = new HttpEntity<>(film, headers);
+        ResponseEntity<Film> responseUpdates = restTemplate.exchange(
+                "http://localhost:" + port + "/films",
+                HttpMethod.PUT,
+                requestEntity,
+                Film.class);
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseUpdates.getStatusCode());
+    }
+
+    @Test
+    void testPostFilmNoTitleFail() {
+        Film film = new Film();
+        film.setName("    ");
+        film.setDuration(30);
+        film.setReleaseDate(LocalDate.now());
+        ResponseEntity<Film> response = this.restTemplate.postForEntity("http://localhost:" + port + "/films", film, Film.class);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    }
+
+    @Test
+    void testPostFilmLongDescFail() {
+        Film film = new Film();
+        film.setName("ttl");
+        film.setDescription("d".repeat(201));
+        film.setDuration(30);
+        film.setReleaseDate(LocalDate.now());
+        ResponseEntity<Film> response = this.restTemplate.postForEntity("http://localhost:" + port + "/films", film, Film.class);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    }
+
+    @Test
+    void testPostFilmNegDurationFail() {
+        Film film = new Film();
+        film.setName("ttl");
+        film.setDuration(-30);
+        film.setReleaseDate(LocalDate.now());
+        ResponseEntity<Film> response = this.restTemplate.postForEntity("http://localhost:" + port + "/films", film, Film.class);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    }
+
+    @Test
+    void testPostFilmPastDateFail() {
+        Film film = new Film();
+        film.setName("ttl");
+        film.setDuration(30);
+        film.setReleaseDate(LocalDate.of(1703,1,1));
+        ResponseEntity<Film> response = this.restTemplate.postForEntity("http://localhost:" + port + "/films", film, Film.class);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 
 }
