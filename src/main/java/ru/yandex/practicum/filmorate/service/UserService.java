@@ -7,9 +7,9 @@ import ru.yandex.practicum.filmorate.except.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.Optional;
+import java.util.Collection;
+import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -20,73 +20,98 @@ public class UserService {
         this.userStorage = userStorage;
     }
 
-    public User getUser(long id) throws NotFoundException {
-        Optional<User> user = userStorage.getUser(id);
-        if (user.isPresent()) {
-            return user.get();
-        } else {
-            throw new NotFoundException("User with id " + id + " not found");
-        }
+    public User findUser(long id) {
+        return userStorage.findUser(id)
+                .orElseThrow(() -> new NotFoundException("User with id " + id + "not found"));
     }
 
-    public long addUser(User user) throws DuplicateException {
+    public Collection<User> findAll() {
+        return userStorage.findAll();
+    }
+
+    public User addUser(User user) {
+        Objects.requireNonNull(user);
+
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
-        return userStorage.addUser(user);
+        try {
+            return userStorage.addUser(user);
+        } catch (IllegalArgumentException illegalArgumentException) {
+            throw new DuplicateException(illegalArgumentException.getMessage());
+        }
     }
 
-    public void updateUser(User user) throws NotFoundException {
+    public User updateUser(User user) {
+        Objects.requireNonNull(user);
+
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
-        userStorage.updateUser(user);
+
+        try {
+            return userStorage.updateUser(user);
+        } catch (IllegalArgumentException illegalArgumentException) {
+            throw new NotFoundException(illegalArgumentException.getMessage());
+        }
     }
 
-    public void deleteUser(User user) {
-        userStorage.deleteUser(user);
+    public void deleteUser(long id) {
+        userStorage.deleteUser(id);
     }
 
-    public void addFriend(long userId, long friendId) throws DuplicateException, NotFoundException {
-        Optional<User> user = userStorage.getUser(userId);
-        if (user.isEmpty()) {
-            throw new NotFoundException("User with id " + userId + " not found");
+    public Set<User> getUserFriends(long id) {
+        try {
+            return userStorage.getFriends(id);
+        } catch (IllegalArgumentException illegalArgumentException) {
+            throw new NotFoundException(illegalArgumentException.getMessage());
         }
-        Optional<User> friend = userStorage.getUser(friendId);
-        if (friend.isEmpty()) {
-            throw new NotFoundException("Friend with id " + friendId + " not found");
-        }
-
-        Set<Long> userFriendIds = user.get().getFriends();
-        if (userFriendIds.contains(friendId)) {
-            throw new DuplicateException("Friend with id " + friendId + " already exists for user with id " + userId);
-        }
-
-        userFriendIds.add(friendId);
-        Set<Long> friendsIds = friend.get().getFriends();
-        friendsIds.add(userId);
-
-        userStorage.updateUser(user.get());
-        userStorage.updateUser(friend.get());
     }
 
-    public void deleteFriend(long userId, long friendId) throws NotFoundException {
-        Optional<User> user = userStorage.getUser(userId);
-        if (user.isEmpty()) {
-            throw new NotFoundException("User with id " + userId + " not found");
+    public Set<User> getCommonFriends(long user1, long user2) {
+        try {
+            Set<User> friends1 = userStorage.getFriends(user1);
+            Set<User> friends2 = userStorage.getFriends(user2);
+            friends1.retainAll(friends2);
+            return friends1;
+        } catch (IllegalArgumentException|NotFoundException e) {
+            throw new NotFoundException(e.getMessage());
         }
-        Optional<User> friend = userStorage.getUser(friendId);
-        if (friend.isEmpty()) {
-            throw new NotFoundException("Friend with id " + friendId + " not found");
+    }
+
+    public void addFriend(long userId, long friendId) {
+        try {
+            User user = findUser(userId);
+            User friend = findUser(friendId);
+            Set<Long> userFriendsIds = user.getFriends();
+            userFriendsIds.add(friendId);
+            Set<Long> friendFriendsIds = friend.getFriends();
+            friendFriendsIds.add(userId);
+            user.setFriends(userFriendsIds);
+            friend.setFriends(friendFriendsIds);
+            userStorage.updateUser(user);
+            userStorage.updateUser(friend);
+        } catch (IllegalArgumentException|NotFoundException e) {
+            throw new NotFoundException(e.getMessage());
         }
+    }
 
-        Set<Long> userFriendIds = user.get().getFriends();
-        userFriendIds.remove(friendId);
-        Set<Long> friendsIds = friend.get().getFriends();
-        friendsIds.remove(userId);
+    public void deleteFriend(long userId, long friendId) {
+        try {
+            User user = findUser(userId);
+            User friend = findUser(friendId);
 
-        userStorage.updateUser(user.get());
-        userStorage.updateUser(friend.get());
+            Set<Long> userFriendsIds = user.getFriends();
+            userFriendsIds.remove(friendId);
+            Set<Long> friendFriendsIds = friend.getFriends();
+            friendFriendsIds.remove(userId);
+            user.setFriends(userFriendsIds);
+            friend.setFriends(friendFriendsIds);
+            userStorage.updateUser(user);
+            userStorage.updateUser(friend);
+        } catch (IllegalArgumentException|NotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        }
     }
 
 
