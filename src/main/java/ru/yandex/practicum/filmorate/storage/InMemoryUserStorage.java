@@ -1,14 +1,10 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.except.DuplicateException;
-import ru.yandex.practicum.filmorate.except.NotFoundException;
-import ru.yandex.practicum.filmorate.except.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class InMemoryUserStorage implements UserStorage {
@@ -16,30 +12,52 @@ public class InMemoryUserStorage implements UserStorage {
     private static long ids = 0;
 
     @Override
-    public Optional<User> getUser(long id) {
+    public Optional<User> findUser(long id) {
         return Optional.ofNullable(users.get(id));
     }
 
     @Override
-    public long addUser(User user) throws DuplicateException {
+    public Collection<User> findAll() {
+        return users.values();
+    }
+
+    @Override
+    public User addUser(User user) {
+        Objects.requireNonNull(user);
+
         if (users.containsKey(user.getId())) {
-            throw new DuplicateException("User with id " + user.getId() + " already exists");
+            throw new IllegalArgumentException("User with id " + user.getId() + " already exists");
         }
         user.setId(++ids);
         users.put(user.getId(), user);
-        return user.getId();
+        return user;
     }
 
     @Override
-    public void updateUser(User user) throws NotFoundException{
+    public User updateUser(User user) {
+        Objects.requireNonNull(user);
+
         if (!users.containsKey(user.getId())) {
-            throw new NotFoundException("User with id " + user.getId() + " doesn't exist");
+            throw new IllegalArgumentException("User with id " + user.getId() + " doesn't exist");
         }
         users.put(user.getId(), user);
+        return user;
     }
 
     @Override
-    public void deleteUser(User user) {
-        users.remove(user.getId());
+    public void deleteUser(long id) {
+        users.remove(id);
+    }
+
+    @Override
+    public Set<User> getFriends(long id) {
+        if (!users.containsKey(id)) {
+            throw new IllegalArgumentException("User with id " + id + " doesn't exist");
+        }
+        User user = users.get(id);
+       return user.getFriends().stream()
+                        .map(this::findUser)
+                        .flatMap(Optional::stream)
+                        .collect(Collectors.toSet());
     }
 }
