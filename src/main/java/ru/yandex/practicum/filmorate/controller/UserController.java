@@ -26,6 +26,12 @@ public class UserController {
         return userService.findAll();
     }
 
+    @GetMapping("/{id}")
+    public User findUser(@PathVariable long id) {
+        log.info("Get user with id {} ", id);
+        return userService.findUser(id);
+    }
+
     @PostMapping
     public User saveUser(@Valid @RequestBody User user) {
         log.info("Save a user: {}", user);

@@ -29,4 +29,9 @@ public class Film {
     private int duration;
 
     private Set<Long> likes = new HashSet<>();
+
+    public int getLikesCount() {
+        return likes.size();
+    }
+
 }

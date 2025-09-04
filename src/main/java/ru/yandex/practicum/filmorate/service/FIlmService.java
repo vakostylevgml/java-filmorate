@@ -1,23 +1,24 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.except.DuplicateException;
 import ru.yandex.practicum.filmorate.except.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 public class FIlmService {
+    private final int DEF_POP_LIST_SIZE;
     private final FilmStorage filmStorage;
 
     @Autowired
-    public FIlmService(FilmStorage filmStorage) {
+    public FIlmService(FilmStorage filmStorage, @Value("${films.defaults.defpopsize}") int defPopListSize) {
         this.filmStorage = filmStorage;
+        DEF_POP_LIST_SIZE = defPopListSize;
     }
 
     public Film findFilm(long id) {
@@ -53,12 +54,40 @@ public class FIlmService {
         filmStorage.deleteFilm(id);
     }
 
-    public void likeFilm(long filmId, long userId) {}
+    public void likeFilm(long filmId, long userId) {
+        try {
+            Film film = findFilm(filmId);
+            Set<Long> likes = film.getLikes();
+            likes.add(userId);
+            film.setLikes(likes);
+            filmStorage.updateFilm(film);
+        } catch (IllegalArgumentException illegalArgumentException) {
+            throw new NotFoundException(illegalArgumentException.getMessage());
+        }
+    }
 
-    public void unlikeFilm(long filmId, long userId) {}
+    public void unlikeFilm(long filmId, long userId) {
+        try {
+            Film film = findFilm(filmId);
+            Set<Long> likes = film.getLikes();
+            likes.remove(userId);
+            film.setLikes(likes);
+            filmStorage.updateFilm(film);
+        } catch (IllegalArgumentException illegalArgumentException) {
+            throw new NotFoundException(illegalArgumentException.getMessage());
+        }
+    }
 
     public List<Film> getMostPopular(int limit) {
-        return List.of();
+        return findAll().stream()
+                .sorted(Comparator.comparingInt(Film::getLikesCount).reversed())
+                .limit(limit)
+                .toList();
     }
+
+    public List<Film> getMostPopular() {
+       return getMostPopular(DEF_POP_LIST_SIZE);
+    }
+
 
 }
