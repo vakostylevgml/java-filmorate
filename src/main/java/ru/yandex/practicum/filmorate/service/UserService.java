@@ -58,6 +58,7 @@ public class UserService {
 
     public void deleteUser(long id) {
         userStorage.deleteUser(id);
+        //@TODO delete friends
     }
 
     public Set<User> getUserFriends(long id) {
@@ -113,6 +114,4 @@ public class UserService {
             throw new NotFoundException(e.getMessage());
         }
     }
-
-
 }
