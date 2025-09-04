@@ -37,6 +37,12 @@ public class FilmController {
         return filmService.findFilm(id);
     }
 
+    @DeleteMapping("/{id}")
+    public void deleteFilm(@PathVariable long id) {
+        log.info("Delete film with id {} ", id);
+        filmService.deleteFilm(id);
+    }
+
     @PostMapping
     public Film saveFilm(@Valid @RequestBody Film film) {
         log.info("Save a film: {}", film);
@@ -62,7 +68,7 @@ public class FilmController {
         log.info("User with id {} unliked movie with id {}", userId, id);
         User user = userService.findUser(userId);
         Film film = filmService.findFilm(id);
-        filmService.likeFilm(id, userId);
+        filmService.unlikeFilm(id, userId);
     }
 
     @GetMapping("/popular")

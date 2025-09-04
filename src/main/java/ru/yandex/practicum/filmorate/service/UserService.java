@@ -58,7 +58,6 @@ public class UserService {
 
     public void deleteUser(long id) {
         userStorage.deleteUser(id);
-        //@TODO delete friends
     }
 
     public Set<User> getUserFriends(long id) {
@@ -75,7 +74,7 @@ public class UserService {
             Set<User> friends2 = userStorage.getFriends(user2);
             friends1.retainAll(friends2);
             return friends1;
-        } catch (IllegalArgumentException|NotFoundException e) {
+        } catch (IllegalArgumentException | NotFoundException e) {
             throw new NotFoundException(e.getMessage());
         }
     }
@@ -92,7 +91,7 @@ public class UserService {
             friend.setFriends(friendFriendsIds);
             userStorage.updateUser(user);
             userStorage.updateUser(friend);
-        } catch (IllegalArgumentException|NotFoundException e) {
+        } catch (IllegalArgumentException | NotFoundException e) {
             throw new NotFoundException(e.getMessage());
         }
     }
@@ -110,7 +109,7 @@ public class UserService {
             friend.setFriends(friendFriendsIds);
             userStorage.updateUser(user);
             userStorage.updateUser(friend);
-        } catch (IllegalArgumentException|NotFoundException e) {
+        } catch (IllegalArgumentException | NotFoundException e) {
             throw new NotFoundException(e.getMessage());
         }
     }

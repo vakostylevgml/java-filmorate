@@ -32,6 +32,12 @@ public class UserController {
         return userService.findUser(id);
     }
 
+    @DeleteMapping("/{id}")
+    public void deleteUser(@PathVariable long id) {
+        log.info("Delete user with id {} ", id);
+        userService.deleteUser(id);
+    }
+
     @PostMapping
     public User saveUser(@Valid @RequestBody User user) {
         log.info("Save a user: {}", user);

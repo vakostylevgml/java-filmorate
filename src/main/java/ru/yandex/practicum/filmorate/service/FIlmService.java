@@ -12,13 +12,13 @@ import java.util.*;
 
 @Service
 public class FIlmService {
-    private final int DEF_POP_LIST_SIZE;
+    private final int defaultListSize;
     private final FilmStorage filmStorage;
 
     @Autowired
-    public FIlmService(FilmStorage filmStorage, @Value("${films.defaults.defpopsize}") int defPopListSize) {
+    public FIlmService(FilmStorage filmStorage, @Value("${films.defaults.defpopsize}") int defaultListSize) {
         this.filmStorage = filmStorage;
-        DEF_POP_LIST_SIZE = defPopListSize;
+        this.defaultListSize = defaultListSize;
     }
 
     public Film findFilm(long id) {
@@ -86,7 +86,7 @@ public class FIlmService {
     }
 
     public List<Film> getMostPopular() {
-       return getMostPopular(DEF_POP_LIST_SIZE);
+       return getMostPopular(defaultListSize);
     }
 
 
