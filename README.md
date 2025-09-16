@@ -2,7 +2,9 @@
 
 <img width="1108" height="779" alt="image" src="https://github.com/user-attachments/assets/351707de-9e40-4ebc-9034-c19d9089e773" />
 
-Диаграмма по [ссылке] (https://dbdiagram.io/d/Filmorate-68c86bb61ff9c616bdcb263c).
+Диаграмма по [ссылке](https://dbdiagram.io/d/Filmorate-68c86bb61ff9c616bdcb263c).
+
+А [здесь](https://runsql.com/r/ca038b63a4cd91d4) можно потестить .Вроде должно работать :) 
 
 ## Примеры запросов
 
