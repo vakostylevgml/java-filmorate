@@ -81,7 +81,7 @@ class FilmsControllerTest {
                 HttpMethod.PUT,
                 requestEntity,
                 Film.class);
-        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseUpdates.getStatusCode());
+        Assertions.assertEquals(HttpStatus.NOT_FOUND, responseUpdates.getStatusCode());
     }
 
     @Test

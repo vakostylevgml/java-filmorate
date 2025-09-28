@@ -85,7 +85,7 @@ class UsersControllerTest {
                 HttpMethod.PUT,
                 requestEntity,
                 User.class);
-        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseUpdates.getStatusCode());
+        Assertions.assertEquals(HttpStatus.NOT_FOUND, responseUpdates.getStatusCode());
     }
 
     @Test
