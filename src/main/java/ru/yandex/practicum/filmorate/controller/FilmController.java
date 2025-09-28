@@ -1,81 +1,69 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.FIlmService;
+import ru.yandex.practicum.filmorate.dto.film.FilmDto;
+import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
+import ru.yandex.practicum.filmorate.dto.film.UpdatedFilmRequest;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.Collection;
 import java.util.List;
 
-@RestController
-@RequestMapping("/films")
 @Slf4j
+@RestController
+@Validated
+@RequestMapping("/films")
 public class FilmController {
-    private final FIlmService filmService;
-    //private final UserService userService;
+    private final FilmService filmService;
 
     @Autowired
-    public FilmController(FIlmService filmService) {
+    public FilmController(FilmService filmService) {
         this.filmService = filmService;
-        //this.userService = userService;
     }
 
     @GetMapping
-    public Collection<Film> findAll() {
-        log.info("Find all films");
+    public Collection<FilmDto> findAll() {
         return filmService.findAll();
     }
 
     @GetMapping("/{id}")
-    public Film findFilm(@PathVariable long id) {
-        log.info("Get film with id {} ", id);
-        return filmService.findFilm(id);
-    }
-
-    @DeleteMapping("/{id}")
-    public void deleteFilm(@PathVariable long id) {
-        log.info("Delete film with id {} ", id);
-        filmService.deleteFilm(id);
+    public FilmDto getFilm(@PathVariable("id") int filmId) {
+        return filmService.getFilmById(filmId);
     }
 
     @PostMapping
-    public Film saveFilm(@Valid @RequestBody Film film) {
-        log.info("Save a film: {}", film);
-        return filmService.addFilm(film);
+    public FilmDto create(@Valid @RequestBody NewFilmRequest newFilm) {
+        return filmService.addFilm(newFilm);
     }
 
     @PutMapping
-    public Film updateFilm(@Valid @RequestBody Film film) {
-        log.info("Update a film: {}", film);
-        return filmService.updateFilm(film);
+    public FilmDto update(@Valid @RequestBody UpdatedFilmRequest updatedFilm) {
+        return filmService.updateFilm(updatedFilm);
+    }
+
+    @DeleteMapping
+    public void delete(@Valid @RequestBody int filmId) {
+        filmService.deleteFilm(filmId);
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public void like(@PathVariable long id, @PathVariable long userId) {
-        log.info("User with id {} liked movie with id {}", userId, id);
-        //User user = userService.findUser(userId);
-        Film film = filmService.findFilm(id);
-        filmService.likeFilm(id, userId);
+    public void like(@PathVariable("id") int filmId, @PathVariable("userId") int userId) {
+        filmService.like(filmId, userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
-    public void unlike(@PathVariable long id, @PathVariable long userId) {
-        log.info("User with id {} unliked movie with id {}", userId, id);
-        //User user = userService.findUser(userId);
-        Film film = filmService.findFilm(id);
-        filmService.unlikeFilm(id, userId);
+    public void unLike(@PathVariable("id") int filmId, @PathVariable("userId") int userId) {
+        log.info("UNKIKE CALL");
+        filmService.unLike(filmId, userId);
     }
 
     @GetMapping("/popular")
-    public List<Film> findMostPop(@RequestParam(required = false) int count) {
-        log.info("Mostpop requested");
-        if (count == 0) {
-            return filmService.getMostPopular();
-        } else {
-            return filmService.getMostPopular(count);
-        }
+    public List<FilmDto> getPopular(@RequestParam(defaultValue = "10") @Positive int count) {
+        return filmService.getMostLiked(count);
     }
 }
