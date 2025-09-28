@@ -27,13 +27,10 @@ public class ErrorHandler {
         return Map.of("validation failed:", e.getMessage());
     }
 
-
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Map<String, String> handleHappinessOverflow(final RuntimeException e) {
+    public Map<String, String> handleInternalError(final RuntimeException e) {
         log.error(e.getMessage());
         return Map.of("internal error:", e.getMessage());
     }
-
-
 }
