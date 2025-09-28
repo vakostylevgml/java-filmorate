@@ -3,6 +3,8 @@ package ru.yandex.practicum.filmorate.mapper;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dto.film.FilmDto;
 import ru.yandex.practicum.filmorate.dto.film.GenreId;
 import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
@@ -18,10 +20,12 @@ import java.util.LinkedHashSet;
 
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Component
 public final class FilmMapper {
     private static MpaService mpaService;
     private static GenreService genreService;
 
+    @Autowired
     public FilmMapper(MpaService mpaS, GenreService genreS) {
         mpaService = mpaS;
         genreService = genreS;

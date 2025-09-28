@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dto.film.FilmDto;
 import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
 import ru.yandex.practicum.filmorate.dto.film.UpdatedFilmRequest;
-import ru.yandex.practicum.filmorate.except.BadRequestException;
 import ru.yandex.practicum.filmorate.except.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -23,41 +22,24 @@ import java.util.stream.Collectors;
 public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
-    private MpaService mpaService;
-    private GenreService genreService;
 
     @Autowired
     public FilmService(FilmStorage filmStorage,
-                       UserStorage userStorage,
-                       MpaService mpaService,
-                       GenreService genreService) {
+                       UserStorage userStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
-        this.mpaService = mpaService;
-        this.genreService = genreService;
-        FilmMapper mapper = new FilmMapper(mpaService, genreService);
     }
 
     public FilmDto addFilm(NewFilmRequest filmRequest) {
-        try {
-            Film film = FilmMapper.mapToFilm(filmRequest);
-            filmStorage.addFilm(film);
-            return FilmMapper.mapToDto(film);
-        } catch (
-                NotFoundException notFoundException) {
-            throw new BadRequestException(notFoundException.getMessage());
-        }
+        Film film = FilmMapper.mapToFilm(filmRequest);
+        filmStorage.addFilm(film);
+        return FilmMapper.mapToDto(film);
     }
 
     public FilmDto updateFilm(UpdatedFilmRequest updatedFilmRequest) {
-        try {
-            Film film = FilmMapper.mapToFilm(updatedFilmRequest);
-            filmStorage.updateFilm(film);
-            return FilmMapper.mapToDto(film);
-        } catch (
-                NotFoundException notFoundException) {
-            throw new BadRequestException(notFoundException.getMessage());
-        }
+                Film film = FilmMapper.mapToFilm(updatedFilmRequest);
+        filmStorage.updateFilm(film);
+        return FilmMapper.mapToDto(film);
     }
 
     public void deleteFilm(int filmId) {
