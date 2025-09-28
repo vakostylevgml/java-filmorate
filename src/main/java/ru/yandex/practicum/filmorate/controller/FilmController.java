@@ -5,9 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FIlmService;
-import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.Collection;
 import java.util.List;
@@ -17,12 +15,12 @@ import java.util.List;
 @Slf4j
 public class FilmController {
     private final FIlmService filmService;
-    private final UserService userService;
+    //private final UserService userService;
 
     @Autowired
-    public FilmController(FIlmService filmService, UserService userService) {
+    public FilmController(FIlmService filmService) {
         this.filmService = filmService;
-        this.userService = userService;
+        //this.userService = userService;
     }
 
     @GetMapping
@@ -58,7 +56,7 @@ public class FilmController {
     @PutMapping("/{id}/like/{userId}")
     public void like(@PathVariable long id, @PathVariable long userId) {
         log.info("User with id {} liked movie with id {}", userId, id);
-        User user = userService.findUser(userId);
+        //User user = userService.findUser(userId);
         Film film = filmService.findFilm(id);
         filmService.likeFilm(id, userId);
     }
@@ -66,7 +64,7 @@ public class FilmController {
     @DeleteMapping("/{id}/like/{userId}")
     public void unlike(@PathVariable long id, @PathVariable long userId) {
         log.info("User with id {} unliked movie with id {}", userId, id);
-        User user = userService.findUser(userId);
+        //User user = userService.findUser(userId);
         Film film = filmService.findFilm(id);
         filmService.unlikeFilm(id, userId);
     }
