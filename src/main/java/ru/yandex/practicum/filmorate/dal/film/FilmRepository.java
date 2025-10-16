@@ -67,6 +67,24 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
 
     private static final String MERGE_GENRE_TO_FILM = "MERGE INTO film_genre (genre_id, film_id) VALUES(?, ?)";
     private static final String DELETE_ALL_GENRES_FROM_FILM = "DELETE FROM film_genre WHERE film_id = ?";
+    private static final String GET_COMMON_FILMS_OF_TWO_USERS = """
+            SELECT fl.*, fg.GENRE_ID, rte.NAME mpa_name, g.name genre_name
+            FROM films fl
+            LEFT JOIN film_genre fg ON fg.film_id = fl.ID
+            LEFT JOIN rating rte ON rte.ID = fl.rating_id
+            LEFT JOIN genre g ON g.id = fg.GENRE_ID
+            WHERE fl.id IN (
+                SELECT l1.film_id
+                FROM likes l1
+                INNER JOIN likes l2 ON l1.film_id = l2.film_id
+                WHERE l1.user_id = ? AND l2.user_id = ?
+            )
+            ORDER BY (
+                SELECT COUNT(*)
+                FROM likes l
+                WHERE l.film_id = fl.id
+            ) DESC
+            """;
 
     public FilmRepository(JdbcTemplate jdbc, RowMapper<Film> mapper, ResultSetExtractor<List<Film>> extractor) {
         super(jdbc, mapper, extractor);
@@ -142,5 +160,9 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
 
     public List<Film> getMostLiked(int limit) {
         return findMany(GET_MOST_LIKED, limit);
+    }
+
+    public List<Film> getCommonFilms(int userId, int friendId) {
+        return findMany(GET_COMMON_FILMS_OF_TWO_USERS, userId, friendId);
     }
 }

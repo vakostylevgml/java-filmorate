@@ -74,4 +74,12 @@ public class FilmService {
     public FilmDto getFilmById(int id) {
         return FilmMapper.mapToDto(filmStorage.getFilmById(id));
     }
+
+    public List<FilmDto> getCommonFilms(int userId, int friendId) {
+        userStorage.findUser(userId).orElseThrow(() -> new NotFoundException("User with id " + userId + " not found"));
+        userStorage.findUser(friendId).orElseThrow(() -> new NotFoundException("User with id " + friendId + " not found"));
+        return filmStorage.getCommonFilms(userId, friendId).stream()
+                .map(FilmMapper::mapToDto)
+                .collect(Collectors.toList());
+    }
 }
