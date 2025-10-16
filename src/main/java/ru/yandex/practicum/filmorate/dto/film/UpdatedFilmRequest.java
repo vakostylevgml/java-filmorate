@@ -41,4 +41,6 @@ public class UpdatedFilmRequest {
 
     @NotNull
     private MpaRequest mpa;
+
+    private LinkedHashSet<DirectorId> directors;
 }
