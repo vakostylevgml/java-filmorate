@@ -71,7 +71,7 @@ public class UserRepository extends BaseRepository<User> implements UserStorage 
 
     @Override
     public void deleteUser(int id) {
-        delete(DELETE_USER_FROM_ALL_FRIENDS, id);
+        delete(DELETE_USER_FROM_ALL_FRIENDS, id, id);
         delete(DELETE_BY_ID, id);
     }
 
