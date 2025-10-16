@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dto.film.FilmDto;
 import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
@@ -19,19 +19,12 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
     private final DirectorService directorService;
-
-    @Autowired
-    public FilmService(FilmStorage filmStorage,
-                       UserStorage userStorage,
-                       DirectorService directorService) {
-        this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
-        this.directorService = directorService;
-    }
+    private final GenreService genreService;
 
     public FilmDto addFilm(NewFilmRequest filmRequest) {
         Film film = FilmMapper.mapToFilm(filmRequest);
@@ -40,7 +33,7 @@ public class FilmService {
     }
 
     public FilmDto updateFilm(UpdatedFilmRequest updatedFilmRequest) {
-                Film film = FilmMapper.mapToFilm(updatedFilmRequest);
+        Film film = FilmMapper.mapToFilm(updatedFilmRequest);
         filmStorage.updateFilm(film);
         return FilmMapper.mapToDto(film);
     }
@@ -66,10 +59,6 @@ public class FilmService {
         filmStorage.unLike(unliker, film);
     }
 
-    public List<FilmDto> getMostLiked(int count) {
-        return filmStorage.getMostLiked(count).stream().map(FilmMapper::mapToDto).toList();
-    }
-
     public void removeAllUserLikes(int userId) {
         throw new UnsupportedOperationException();
     }
@@ -84,6 +73,15 @@ public class FilmService {
             throw new IllegalArgumentException("Sort parameter must be 'year' or 'likes'");
         }
         return filmStorage.getFilmsByDirector(directorId, sortBy).stream()
+                .map(FilmMapper::mapToDto)
+                .toList();
+    }
+
+    public List<FilmDto> getPopularFilmsByParameters(Integer genreId, Integer year, int count) {
+        if (genreId != null) {
+            genreService.getGenreById(genreId);
+        }
+        return filmStorage.getPopularFilmsByParameters(genreId, year, count).stream()
                 .map(FilmMapper::mapToDto)
                 .toList();
     }

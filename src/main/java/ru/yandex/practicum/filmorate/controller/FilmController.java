@@ -63,15 +63,17 @@ public class FilmController {
         filmService.unLike(filmId, userId);
     }
 
-    @GetMapping("/popular")
-    public List<FilmDto> getPopular(@RequestParam(defaultValue = "10") @Positive int count) {
-        return filmService.getMostLiked(count);
-    }
-
     @GetMapping("/director/{directorId}")
     public List<FilmDto> getFilmsByDirector(
             @PathVariable("directorId") int directorId,
             @RequestParam String sortBy) {
         return filmService.getFilmsByDirector(directorId, sortBy);
+    }
+
+    @GetMapping("/popular")
+    public List<FilmDto> getPopular(@RequestParam(defaultValue = "10") @Positive(message = "Count must be positive") int count,
+                                    @RequestParam(required = false) @Positive(message = "GenreId must be positive") Integer genreId,
+                                    @RequestParam(required = false) @Positive(message = "Year must be positive") Integer year) {
+        return filmService.getPopularFilmsByParameters(genreId, year, count);
     }
 }

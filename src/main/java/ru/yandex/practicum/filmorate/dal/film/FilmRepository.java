@@ -53,21 +53,27 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
 
     private static final String DELETE_FILMS = "DELETE FROM films WHERE id = ?";
 
-    private static final String GET_MOST_LIKED = """
-             SELECT fl.*, fg.GENRE_ID, rte.NAME as MPANAME, g.NAME as GNAME, fd.director_id, d.name as director_name
-             FROM films fl
-                             LEFT JOIN film_genre fg ON fg.film_id = fl.ID
-                             LEFT JOIN rating rte ON rte.ID = fl.rating_id
-                            LEFT JOIN genre g on g.id = fg.GENRE_ID
-                            LEFT JOIN film_director fd ON fd.film_id = fl.id
-                            LEFT JOIN directors d ON d.id = fd.director_id
-                             LEFT JOIN (SELECT film_id, COUNT (user_id) AS lksc
-                                                            FROM likes
-                                                            GROUP BY film_id
-                                                            ) AS flikes ON (fl.id = flikes.film_id)
-                                                        ORDER BY flikes.lksc DESC
-                                                        LIMIT ?
-            \s""";
+    private static final String GET_POPULAR_FILMS = """
+            SELECT fl.*, fg.GENRE_ID, rte.NAME as MPANAME, g.NAME as GNAME, fd.director_id, d.name as director_name
+            FROM films fl
+            LEFT JOIN film_genre fg ON fg.film_id = fl.ID
+            LEFT JOIN rating rte ON rte.ID = fl.rating_id
+            LEFT JOIN genre g on g.id = fg.GENRE_ID
+            LEFT JOIN film_director fd ON fd.film_id = fl.id
+            LEFT JOIN directors d ON d.id = fd.director_id
+            LEFT JOIN (
+                SELECT film_id, COUNT(user_id) AS lksc
+                FROM likes
+                GROUP BY film_id
+            ) AS flikes ON (fl.id = flikes.film_id)
+            WHERE (? IS NULL OR EXISTS (
+                    SELECT 1 FROM film_genre fg2
+                    WHERE fg2.film_id = fl.id AND fg2.genre_id = ?
+                ))
+                AND (? IS NULL OR EXTRACT(YEAR FROM fl.release_date) = ?)
+            ORDER BY flikes.lksc DESC NULLS LAST, fl.id DESC
+            LIMIT ?
+            """;
 
     private static final String LIKE = "MERGE INTO likes(user_id, film_id)" +
             " VALUES (?, ?)";
@@ -176,10 +182,6 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
         delete(UNLIKE, user.getId(), film.getId());
     }
 
-    public List<Film> getMostLiked(int limit) {
-        return findMany(GET_MOST_LIKED, limit);
-    }
-
     public List<Film> getFilmsByDirector(int directorId, String sortBy) {
         String orderClause;
         switch (sortBy.toLowerCase()) {
@@ -202,5 +204,9 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
     public List<Film> getFilmsByDirector(int directorId) {
         String query = String.format(GET_FILMS_BY_DIRECTOR, "fl.id");
         return findMany(query, directorId);
+    }
+
+    public List<Film> getPopularFilmsByParameters(Integer genreId, Integer year, int count) {
+        return findMany(GET_POPULAR_FILMS, genreId, genreId, year, year, count);
     }
 }
