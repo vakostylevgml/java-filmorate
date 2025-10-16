@@ -22,12 +22,15 @@ import java.util.stream.Collectors;
 public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
+    private final DirectorService directorService;
 
     @Autowired
     public FilmService(FilmStorage filmStorage,
-                       UserStorage userStorage) {
+                       UserStorage userStorage,
+                       DirectorService directorService) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
+        this.directorService = directorService;
     }
 
     public FilmDto addFilm(NewFilmRequest filmRequest) {
@@ -89,5 +92,14 @@ public class FilmService {
                 .collect(Collectors.toList());
         log.info("GET /common: found {} common films for users {} and {}", commonFilms.size(), userId, friendId);
         return commonFilms;
+      
+    public List<FilmDto> getFilmsByDirector(int directorId, String sortBy) {
+        directorService.getDirectorById(directorId);
+        if (!sortBy.equals("year") && !sortBy.equals("likes")) {
+            throw new IllegalArgumentException("Sort parameter must be 'year' or 'likes'");
+        }
+        return filmStorage.getFilmsByDirector(directorId, sortBy).stream()
+                .map(FilmMapper::mapToDto)
+                .toList();
     }
 }

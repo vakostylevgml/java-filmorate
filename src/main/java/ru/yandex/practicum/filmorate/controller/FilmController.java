@@ -73,5 +73,11 @@ public class FilmController {
                                         @RequestParam @Positive(message = "User ID must be positive") int friendId) {
         log.info("GET /common: receiving common films for ID {} and ID {}", userId, friendId);
         return filmService.getCommonFilms(userId, friendId);
+      
+    @GetMapping("/director/{directorId}")
+    public List<FilmDto> getFilmsByDirector(
+            @PathVariable("directorId") int directorId,
+            @RequestParam String sortBy) {
+        return filmService.getFilmsByDirector(directorId, sortBy);
     }
 }
