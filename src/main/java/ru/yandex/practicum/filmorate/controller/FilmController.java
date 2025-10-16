@@ -74,7 +74,7 @@ public class FilmController {
     public List<FilmDto> getPopular(@RequestParam(defaultValue = "10") @Positive(message = "Count must be positive") int count,
                                     @RequestParam(required = false) @Positive(message = "GenreId must be positive") Integer genreId,
                                     @RequestParam(required = false) @Positive(message = "Year must be positive") Integer year) {
-        log.info("GET /common: receiving popular films");
+        log.info("GET /popular: receiving popular films");
         return filmService.getPopularFilmsByParameters(genreId, year, count);
     }
 }
