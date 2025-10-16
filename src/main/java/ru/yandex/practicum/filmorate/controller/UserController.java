@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,10 +30,15 @@ public class UserController {
         return userService.findAll();
     }
 
-    @DeleteMapping
-    public void deleteUser(@Valid @RequestBody int id) {
-        log.info("Delete user with id {} ", id);
-        userService.deleteUser(id);
+    @GetMapping("/{id}")
+    public UserDto getUserById(@PathVariable("id") int id) {
+        return userService.getUserByID(id);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteUser(@PathVariable("id") @Positive int userId) {
+        log.info("Delete user with id {}", userId);
+        userService.deleteUser(userId);
     }
 
     @PostMapping
