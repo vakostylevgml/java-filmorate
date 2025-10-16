@@ -25,6 +25,9 @@ public class Film {
 
     private MpaRating mpa;
 
+    @Builder.Default
+    private LinkedHashSet<Director> directors = new LinkedHashSet<>();
+
     public void addGenres(Set<Genre> newGenres) {
         genres.addAll(newGenres);
     }

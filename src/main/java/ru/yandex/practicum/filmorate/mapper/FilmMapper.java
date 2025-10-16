@@ -5,10 +5,10 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.dto.film.FilmDto;
-import ru.yandex.practicum.filmorate.dto.film.GenreId;
-import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
-import ru.yandex.practicum.filmorate.dto.film.UpdatedFilmRequest;
+import ru.yandex.practicum.filmorate.dal.director.DirectorRepository;
+import ru.yandex.practicum.filmorate.dto.director.DirectorDto;
+import ru.yandex.practicum.filmorate.dto.film.*;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MpaRating;
@@ -17,6 +17,8 @@ import ru.yandex.practicum.filmorate.service.MpaService;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -24,11 +26,13 @@ import java.util.LinkedHashSet;
 public final class FilmMapper {
     private static MpaService mpaService;
     private static GenreService genreService;
+    private static DirectorRepository directorRepository;
 
     @Autowired
-    public FilmMapper(MpaService mpaS, GenreService genreS) {
+    public FilmMapper(MpaService mpaS, GenreService genreS, DirectorRepository directorR) {
         mpaService = mpaS;
         genreService = genreS;
+        directorRepository = directorR;
     }
 
     public static Film mapToFilm(NewFilmRequest request) {
@@ -58,6 +62,14 @@ public final class FilmMapper {
         } else {
             log.info("Genres not set for {}, size = {}", request.getName(), film.getGenres().size());
         }
+
+        if (request.getDirectors() != null && !request.getDirectors().isEmpty()) {
+            List<Integer> directorIds = request.getDirectors().stream()
+                    .map(DirectorId::getId)
+                    .collect(Collectors.toList());
+            List<Director> directors = directorRepository.getDirectorsByIds(directorIds);
+            film.setDirectors(new LinkedHashSet<>(directors));
+        }
         return film;
     }
 
@@ -83,6 +95,14 @@ public final class FilmMapper {
             }
             film.setGenres(genreSet);
         }
+
+        if (request.getDirectors() != null && !request.getDirectors().isEmpty()) {
+            List<Integer> directorIds = request.getDirectors().stream()
+                    .map(DirectorId::getId)
+                    .collect(Collectors.toList());
+            List<Director> directors = directorRepository.getDirectorsByIds(directorIds);
+            film.setDirectors(new LinkedHashSet<>(directors));
+        }
         return film;
     }
 
@@ -102,6 +122,12 @@ public final class FilmMapper {
             fIlmDto.setGenres(film.getGenres());
         }
 
+        if (film.getDirectors() != null && !film.getDirectors().isEmpty()) {
+            LinkedHashSet<DirectorDto> directorDtos = film.getDirectors().stream()
+                    .map(DirectorMapper::mapToDto)
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
+            fIlmDto.setDirectors(directorDtos);
+        }
         return fIlmDto;
     }
 }
