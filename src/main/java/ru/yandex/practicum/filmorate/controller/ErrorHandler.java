@@ -17,7 +17,7 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, String> notfoundException(final NotFoundException e) {
         log.error(e.getMessage());
-        return Map.of("not found:", e.getMessage());
+        return Map.of("error", e.getMessage());   // исправлено на error, postman-тест ожидает error
     }
 
     @ExceptionHandler

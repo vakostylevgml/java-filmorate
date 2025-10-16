@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.dal.film;
 
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MpaRating;
@@ -21,6 +22,7 @@ public class FilmListExtractor implements ResultSetExtractor<List<Film>> {
             int filmId = resultSet.getInt("id");
             Film film;
             LinkedHashSet<Genre> genreSet = new LinkedHashSet<>();
+            LinkedHashSet<Director> directorSet = new LinkedHashSet<>();
 
             if (!filmsMap.containsKey(filmId)) {
                 Timestamp releaseDate = resultSet.getTimestamp("release_date");
@@ -40,8 +42,18 @@ public class FilmListExtractor implements ResultSetExtractor<List<Film>> {
                 }
                 filmsMap.put(filmId, film);
                 genreSet = new LinkedHashSet<>();
+                directorSet = new LinkedHashSet<>();
             } else {
                 film = filmsMap.get(filmId);
+            }
+
+            int directorId = resultSet.getInt("director_id");
+            String directorName = resultSet.getString("director_name");
+            if (directorId > 0) {
+                Director director = Director.builder()
+                        .id(directorId)
+                        .name(directorName).build();
+                directorSet.add(director);
             }
 
             int genreId = resultSet.getInt("genre_id");
@@ -54,6 +66,7 @@ public class FilmListExtractor implements ResultSetExtractor<List<Film>> {
                 genreSet.add(genre);
             }
             film.addGenres(genreSet);
+            film.setDirectors(directorSet);
         }
         return new ArrayList<>(filmsMap.values());
     }
