@@ -57,8 +57,10 @@ public class UserService {
     }
 
     public void deleteUser(int userId) {
-        Optional<User> user = userStorage.findUser(userId);
-        user.ifPresent(value -> userStorage.deleteUser(value.getId()));
+        if (userStorage.findUser(userId).isEmpty()) {
+            throw new NotFoundException("User with id " + userId + " not found");
+        }
+        userStorage.deleteUser(userId);
     }
 
     public List<UserDto> findAll() {
