@@ -68,9 +68,10 @@ public class FilmController {
         return filmService.getMostLiked(count);
     }
 
-    @GetMapping("/films/common")
+    @GetMapping("/common")
     public List<FilmDto> getCommonFilms(@RequestParam @Positive(message = "User ID must be positive") int userId,
                                         @RequestParam @Positive(message = "User ID must be positive") int friendId) {
+        log.info("GET /common: receiving common films for ID {} and ID {}", userId, friendId);
         return filmService.getCommonFilms(userId, friendId);
     }
 }

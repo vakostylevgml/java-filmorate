@@ -68,11 +68,11 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
     private static final String MERGE_GENRE_TO_FILM = "MERGE INTO film_genre (genre_id, film_id) VALUES(?, ?)";
     private static final String DELETE_ALL_GENRES_FROM_FILM = "DELETE FROM film_genre WHERE film_id = ?";
     private static final String GET_COMMON_FILMS_OF_TWO_USERS = """
-            SELECT fl.*, fg.GENRE_ID, rte.NAME mpa_name, g.name genre_name
+            SELECT fl.*, fg.GENRE_ID, rte.NAME as MPANAME, g.NAME as GNAME
             FROM films fl
             LEFT JOIN film_genre fg ON fg.film_id = fl.ID
             LEFT JOIN rating rte ON rte.ID = fl.rating_id
-            LEFT JOIN genre g ON g.id = fg.GENRE_ID
+            LEFT JOIN genre g on g.id = fg.GENRE_ID
             WHERE fl.id IN (
                 SELECT l1.film_id
                 FROM likes l1

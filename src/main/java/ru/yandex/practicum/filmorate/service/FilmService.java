@@ -37,7 +37,7 @@ public class FilmService {
     }
 
     public FilmDto updateFilm(UpdatedFilmRequest updatedFilmRequest) {
-                Film film = FilmMapper.mapToFilm(updatedFilmRequest);
+        Film film = FilmMapper.mapToFilm(updatedFilmRequest);
         filmStorage.updateFilm(film);
         return FilmMapper.mapToDto(film);
     }
@@ -76,10 +76,18 @@ public class FilmService {
     }
 
     public List<FilmDto> getCommonFilms(int userId, int friendId) {
-        userStorage.findUser(userId).orElseThrow(() -> new NotFoundException("User with id " + userId + " not found"));
-        userStorage.findUser(friendId).orElseThrow(() -> new NotFoundException("User with id " + friendId + " not found"));
-        return filmStorage.getCommonFilms(userId, friendId).stream()
+        userStorage.findUser(userId).orElseThrow(() -> {
+            log.warn("GET /common: user with ID {} not found", userId);
+            return new NotFoundException("User with id " + userId + " not found");
+        });
+        User user = userStorage.findUser(friendId).orElseThrow(() -> {
+            log.warn("GET /common: user with ID {} not found", friendId);
+            return new NotFoundException("User with id " + friendId + " not found");
+        });
+        List<FilmDto> commonFilms = filmStorage.getCommonFilms(userId, friendId).stream()
                 .map(FilmMapper::mapToDto)
                 .collect(Collectors.toList());
+        log.info("GET /common: found {} common films for users {} and {}", commonFilms.size(), userId, friendId);
+        return commonFilms;
     }
 }
