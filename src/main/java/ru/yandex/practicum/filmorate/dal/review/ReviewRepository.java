@@ -29,7 +29,17 @@ public class ReviewRepository extends BaseRepository<Review> {
             LEFT JOIN REVIEW_LIKES_DISLIKES AS rld
             ON rld.review_id = r.id
             GROUP BY r.id
-            HAVING r.film_id = ?;
+            HAVING r.film_id = ?
+            ORDER BY ld DESC
+            LIMIT ?;
+            """;
+
+    private static final String GET_ALL_REVIEWS = """
+            SELECT r.*, SUM(rld.like_dislike) AS ld FROM REVIEWS AS r
+            LEFT JOIN REVIEW_LIKES_DISLIKES AS rld
+            ON rld.review_id = r.id
+            GROUP BY r.id
+            ORDER BY ld DESC;
             """;
 
     private static final String INSERT_LIKE = "MERGE INTO review_likes_dislikes (user_id, review_id, like_dislike) " +
@@ -49,8 +59,12 @@ public class ReviewRepository extends BaseRepository<Review> {
         return findOne(GET_REVIEW_BY_ID, id);
     }
 
-    public List<Review> getReviewsByFilmId(int id) {
-        return findMany(GET_ALL_REVIEWS_BY_FILM_ID, id);
+    public List<Review> getReviewsByFilmId(int id, int limit) {
+        return findMany(GET_ALL_REVIEWS_BY_FILM_ID, id, limit);
+    }
+
+    public List<Review> getAllReviews() {
+        return findMany(GET_ALL_REVIEWS);
     }
 
     public Review createReview(Review review) {

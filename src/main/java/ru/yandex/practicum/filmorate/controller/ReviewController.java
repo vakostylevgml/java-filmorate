@@ -31,9 +31,14 @@ public class ReviewController {
     }
 
     @GetMapping
-    public List<ReviewDto> getReviewsForFilm(@RequestParam int filmId) {
-        log.info("Get reviews for movie with ID = {}", filmId);
-        return reviewService.getReviewsByFilmId(filmId);
+    public List<ReviewDto> getReviews(@RequestParam(required = false) Integer filmId, @RequestParam(required = false, defaultValue = "10") int limit) {
+        if (filmId == null) {
+            log.info("Get all reviews");
+            return reviewService.getAllReviews();
+        } else {
+            log.info("Get reviews for movie with ID = {} and limit = {}", filmId, limit);
+            return reviewService.getReviewsByFilmId(filmId, limit);
+        }
     }
 
     @GetMapping("/{id}")

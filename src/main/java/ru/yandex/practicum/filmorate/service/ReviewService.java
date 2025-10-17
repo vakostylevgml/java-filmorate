@@ -31,9 +31,13 @@ public class ReviewService {
                 new NotFoundException("Review with id + " + id + "not found"));
     }
 
-    public List<ReviewDto> getReviewsByFilmId(int id) {
+    public List<ReviewDto> getReviewsByFilmId(int id, int limit) {
         Film film = filmStorage.getFilmById(id);
-        return reviewRepository.getReviewsByFilmId(id).stream().map(ReviewMapper::mapToDto).toList();
+        return reviewRepository.getReviewsByFilmId(id, limit).stream().map(ReviewMapper::mapToDto).toList();
+    }
+
+    public List<ReviewDto> getAllReviews() {
+        return reviewRepository.getAllReviews().stream().map(ReviewMapper::mapToDto).toList();
     }
 
     public ReviewDto createReview(NewReviewRequest request) {
@@ -48,7 +52,7 @@ public class ReviewService {
         Film film = filmStorage.getFilmById(request.getFilmId());
         User user = userStorage.findUser(request.getUserId()).orElseThrow(() ->
                 new NotFoundException("Couldn't add review from unexisting user with id = " + request.getUserId()));
-        Review review = reviewRepository.createReview(ReviewMapper.mapToReview(request));
+        Review review = reviewRepository.updateReview(ReviewMapper.mapToReview(request));
         return ReviewMapper.mapToDto(reviewRepository.updateReview(ReviewMapper.mapToReview(request)));
     }
 
