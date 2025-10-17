@@ -63,11 +63,6 @@ public class FilmController {
         filmService.unLike(filmId, userId);
     }
 
-    @GetMapping("/popular")
-    public List<FilmDto> getPopular(@RequestParam(defaultValue = "10") @Positive int count) {
-        return filmService.getMostLiked(count);
-    }
-
     @GetMapping("/common")
     public List<FilmDto> getCommonFilms(@RequestParam @Positive(message = "User ID must be positive") int userId,
                                         @RequestParam @Positive(message = "User ID must be positive") int friendId) {
