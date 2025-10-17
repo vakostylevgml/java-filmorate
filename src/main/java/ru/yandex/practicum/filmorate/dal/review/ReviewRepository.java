@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class ReviewStorage extends BaseRepository<Review> {
+public class ReviewRepository extends BaseRepository<Review> {
     private static final String INSERT_REVIEW = "INSERT INTO reviews (user_id, film_id, content, ispositive) " +
             " VALUES (?, ?, ?, ?)";
     private static final String UPDATE = "UPDATE reviews SET content = ?, ispositive = ? WHERE id = ?";
@@ -41,7 +41,7 @@ public class ReviewStorage extends BaseRepository<Review> {
     private static final String DELETE_LIKE_DISLIKE = "DELETE FROM review_likes_dislikes WHERE user_id = ? " +
             "AND review_id = ?";
 
-    public ReviewStorage(JdbcTemplate jdbc, RowMapper<Review> mapper, ResultSetExtractor<List<Review>> listExtractor) {
+    public ReviewRepository(JdbcTemplate jdbc, RowMapper<Review> mapper, ResultSetExtractor<List<Review>> listExtractor) {
         super(jdbc, mapper, listExtractor);
     }
 
