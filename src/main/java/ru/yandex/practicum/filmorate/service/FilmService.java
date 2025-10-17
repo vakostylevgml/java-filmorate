@@ -67,6 +67,22 @@ public class FilmService {
         return FilmMapper.mapToDto(filmStorage.getFilmById(id));
     }
 
+    public List<FilmDto> getCommonFilms(int userId, int friendId) {
+        userStorage.findUser(userId).orElseThrow(() -> {
+            log.warn("GET /common: user with ID {} not found", userId);
+            return new NotFoundException("User with id " + userId + " not found");
+        });
+        userStorage.findUser(friendId).orElseThrow(() -> {
+            log.warn("GET /common: friend with ID {} not found", friendId);
+            return new NotFoundException("User with id " + friendId + " not found");
+        });
+        List<FilmDto> commonFilms = filmStorage.getCommonFilms(userId, friendId).stream()
+                .map(FilmMapper::mapToDto)
+                .collect(Collectors.toList());
+        log.info("GET /common: found {} common films for users {} and {}", commonFilms.size(), userId, friendId);
+        return commonFilms;
+    }
+
     public List<FilmDto> getFilmsByDirector(int directorId, String sortBy) {
         directorService.getDirectorById(directorId);
         if (!sortBy.equals("year") && !sortBy.equals("likes")) {

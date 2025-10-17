@@ -59,8 +59,20 @@ public class FilmController {
 
     @DeleteMapping("/{id}/like/{userId}")
     public void unLike(@PathVariable("id") int filmId, @PathVariable("userId") int userId) {
-        log.info("UNKIKE CALL");
+        log.info("UNLIKE CALL");
         filmService.unLike(filmId, userId);
+    }
+
+    @GetMapping("/popular")
+    public List<FilmDto> getPopular(@RequestParam(defaultValue = "10") @Positive int count) {
+        return filmService.getMostLiked(count);
+    }
+
+    @GetMapping("/common")
+    public List<FilmDto> getCommonFilms(@RequestParam @Positive(message = "User ID must be positive") int userId,
+                                        @RequestParam @Positive(message = "User ID must be positive") int friendId) {
+        log.info("GET /common: receiving common films for ID {} and ID {}", userId, friendId);
+        return filmService.getCommonFilms(userId, friendId);
     }
 
     @GetMapping("/director/{directorId}")
