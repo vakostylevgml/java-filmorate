@@ -13,6 +13,8 @@ import ru.yandex.practicum.filmorate.mapper.ReviewMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.event.EventType;
+import ru.yandex.practicum.filmorate.model.event.OperationType;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -45,6 +47,7 @@ public class ReviewService {
         User user = userStorage.findUser(request.getUserId()).orElseThrow(() ->
                 new NotFoundException("Couldn't add review from unexisting user with id = " + request.getUserId()));
         Review review = reviewRepository.createReview(ReviewMapper.mapToReview(request));
+        userStorage.addEvent(user.getId(), review.getId(), EventType.REVIEW, OperationType.ADD);
         return ReviewMapper.mapToDto(review);
     }
 
@@ -53,6 +56,7 @@ public class ReviewService {
         User user = userStorage.findUser(request.getUserId()).orElseThrow(() ->
                 new NotFoundException("Couldn't add review from unexisting user with id = " + request.getUserId()));
         Review review = reviewRepository.updateReview(ReviewMapper.mapToReview(request));
+        userStorage.addEvent(user.getId(), review.getId(), EventType.REVIEW, OperationType.UPDATE);
         return ReviewMapper.mapToDto(reviewRepository.updateReview(ReviewMapper.mapToReview(request)));
     }
 
@@ -60,6 +64,7 @@ public class ReviewService {
         Review review = reviewRepository.getReviewById(id).orElseThrow(() ->
                 new ValidationException("Couldn't delete unexisting review with id = " + id));
         reviewRepository.deleteReview(id);
+        userStorage.addEvent(review.getUserId(), review.getId(), EventType.REVIEW, OperationType.REMOVE);
     }
 
     public void addLikeToReview(int userId, int reviewId) {

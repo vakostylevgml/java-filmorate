@@ -10,6 +10,8 @@ import ru.yandex.practicum.filmorate.except.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.event.EventType;
+import ru.yandex.practicum.filmorate.model.event.OperationType;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -51,12 +53,14 @@ public class FilmService {
         User liker = userStorage.findUser(userId).orElseThrow(() -> new NotFoundException("User with id " + userId + " not found"));
         Film film = filmStorage.getFilmById(filmId);
         filmStorage.like(liker, film);
+        userStorage.addEvent(userId, film.getId(), EventType.LIKE, OperationType.ADD);
     }
 
     public void unLike(int filmId, int userId) {
         User unliker = userStorage.findUser(userId).orElseThrow(() -> new NotFoundException("User with id " + userId + " not found"));
         Film film = filmStorage.getFilmById(filmId);
         filmStorage.unLike(unliker, film);
+        userStorage.addEvent(userId, film.getId(), EventType.LIKE, OperationType.REMOVE);
     }
 
     public void removeAllUserLikes(int userId) {

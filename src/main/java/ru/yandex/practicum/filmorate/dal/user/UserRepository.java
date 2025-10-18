@@ -7,8 +7,13 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dal.BaseRepository;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.event.Event;
+import ru.yandex.practicum.filmorate.model.event.EventType;
+import ru.yandex.practicum.filmorate.model.event.OperationType;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,6 +40,10 @@ public class UserRepository extends BaseRepository<User> implements UserStorage 
             INNER JOIN users AS u ON u.id = friend_fr.user_id_2
             WHERE user_fr.user_id_1 = ? AND friend_fr.user_id_1 = ?
             AND user_fr.user_id_2 <> friend_fr.user_id_1 AND friend_fr.user_id_1 <> user_fr.user_id_1""";
+
+    private static final String ADD_EVENT_QUERY = "INSERT INTO events(e_timestamp, user_id, " +
+            "operation, type, entity_id) VALUES (?, ?, ?, ?, ?)";
+    private static final String GET_EVENT_QUERY = "SELECT * from events WHERE user_id = ?";
 
     public UserRepository(JdbcTemplate jdbc, RowMapper<User> mapper, ResultSetExtractor<List<User>> extractor) {
         super(jdbc, mapper, extractor);
@@ -104,5 +113,16 @@ public class UserRepository extends BaseRepository<User> implements UserStorage 
 
     public List<User> getCommonFriends(int userId, int userId2) {
         return findMany(COMMON_FRIENDS, userId, userId2);
+    }
+
+    @Override
+    public void addEvent(int userId, int entityId, EventType type, OperationType operation) {
+        int id = insert(ADD_EVENT_QUERY, LocalDateTime.now(), userId, operation.toString(), type.toString(), entityId);
+        log.info("Added event with id = {} and type = {} and operation = {}", id, type, operation);
+    }
+
+    @Override
+    public Collection<Event> getFeed(int userId) {
+        return jdbc.query(GET_EVENT_QUERY, new EventRowMapper(), userId);
     }
 }
