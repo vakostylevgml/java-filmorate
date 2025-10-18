@@ -29,8 +29,7 @@ public class DirectorRepository extends BaseRepository<Director> {
     }
 
     public Optional<Director> getDirectorById(int id) {
-        List<Director> directors = getDirectorsByIds(List.of(id));
-        return directors.isEmpty() ? Optional.empty() : Optional.of(directors.get(0));
+        return findOne(FIND_BY_ID_QUERY, id);
     }
 
     public List<Director> getDirectorsByIds(List<Integer> ids) {
