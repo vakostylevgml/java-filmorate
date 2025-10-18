@@ -101,4 +101,12 @@ public class FilmService {
                 .map(FilmMapper::mapToDto)
                 .toList();
     }
+
+    public List<FilmDto> searchFilms(String query, String by) {
+        String[] searchTypes = by.split(",");
+        List<Film> films = filmStorage.searchFilms(query, searchTypes);
+        return films.stream()
+                .map(FilmMapper::mapToDto)
+                .collect(Collectors.toList());
+    }
 }
