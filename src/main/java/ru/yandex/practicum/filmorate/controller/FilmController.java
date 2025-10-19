@@ -84,4 +84,11 @@ public class FilmController {
         log.info("GET /popular: receiving popular films");
         return filmService.getPopularFilmsByParameters(genreId, year, count);
     }
+
+    @GetMapping("/search")
+    public List<FilmDto> searchFilms(
+            @RequestParam String query,
+            @RequestParam String by) {
+        return filmService.searchFilms(query, by);
+    }
 }

@@ -119,6 +119,54 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
     private static final String MERGE_DIRECTOR_TO_FILM = "MERGE INTO film_director (director_id, film_id) VALUES(?, ?)";
     private static final String DELETE_ALL_DIRECTORS_FROM_FILM = "DELETE FROM film_director WHERE film_id = ?";
 
+    private static final String SEARCH_BY_TITLE = """
+            SELECT fl.*, fg.GENRE_ID, rte.NAME as MPANAME, g.NAME as GNAME, fd.director_id, d.name as director_name
+            FROM films fl
+            LEFT JOIN film_genre fg ON fg.film_id = fl.ID
+            LEFT JOIN rating rte ON rte.ID = fl.rating_id
+            LEFT JOIN genre g on g.id = fg.GENRE_ID
+            LEFT JOIN film_director fd ON fd.film_id = fl.id
+            LEFT JOIN directors d ON d.id = fd.director_id
+            LEFT JOIN (SELECT film_id, COUNT(user_id) AS like_count
+                        FROM likes
+                        GROUP BY film_id
+                        ) AS flikes ON (fl.id = flikes.film_id)
+            WHERE LOWER(fl.name) LIKE '%' || ? || '%'
+            ORDER BY flikes.like_count DESC NULLS LAST
+            """;
+
+    private static final String SEARCH_BY_DIRECTOR = """
+            SELECT fl.*, fg.GENRE_ID, rte.NAME as MPANAME, g.NAME as GNAME, fd.director_id, d.name as director_name
+            FROM films fl
+            LEFT JOIN film_genre fg ON fg.film_id = fl.ID
+            LEFT JOIN rating rte ON rte.ID = fl.rating_id
+            LEFT JOIN genre g on g.id = fg.GENRE_ID
+            LEFT JOIN film_director fd ON fd.film_id = fl.id
+            LEFT JOIN directors d ON d.id = fd.director_id
+            LEFT JOIN (SELECT film_id, COUNT(user_id) AS like_count
+                        FROM likes
+                        GROUP BY film_id
+                        ) AS flikes ON (fl.id = flikes.film_id)
+            WHERE LOWER(d.name) LIKE '%' || ? || '%'
+            ORDER BY flikes.like_count DESC NULLS LAST
+            """;
+
+    private static final String SEARCH_BY_TITLE_AND_DIRECTOR = """
+            SELECT fl.*, fg.GENRE_ID, rte.NAME as MPANAME, g.NAME as GNAME, fd.director_id, d.name as director_name
+            FROM films fl
+            LEFT JOIN film_genre fg ON fg.film_id = fl.ID
+            LEFT JOIN rating rte ON rte.ID = fl.rating_id
+            LEFT JOIN genre g on g.id = fg.GENRE_ID
+            LEFT JOIN film_director fd ON fd.film_id = fl.id
+            LEFT JOIN directors d ON d.id = fd.director_id
+            LEFT JOIN (SELECT film_id, COUNT(user_id) AS like_count
+                        FROM likes
+                        GROUP BY film_id
+                        ) AS flikes ON (fl.id = flikes.film_id)
+            WHERE LOWER(fl.name) LIKE '%' || ? || '%' OR LOWER(d.name) LIKE '%' || ? || '%'
+            ORDER BY flikes.like_count DESC NULLS LAST
+            """;
+
     public FilmRepository(JdbcTemplate jdbc, RowMapper<Film> mapper, ResultSetExtractor<List<Film>> extractor) {
         super(jdbc, mapper, extractor);
     }
@@ -232,5 +280,31 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
 
     public List<Film> getPopularFilmsByParameters(Integer genreId, Integer year, int count) {
         return findMany(GET_POPULAR_FILMS, genreId, genreId, year, year, count);
+    }
+
+    @Override
+    public List<Film> searchFilms(String query, String[] searchTypes) {
+        String searchTerm = "%" + query.toLowerCase() + "%";
+        boolean searchByTitle = false;
+        boolean searchByDirector = false;
+
+        for (String type : searchTypes) {
+            if ("title".equalsIgnoreCase(type.trim())) {
+                searchByTitle = true;
+            }
+            if ("director".equalsIgnoreCase(type.trim())) {
+                searchByDirector = true;
+            }
+        }
+
+        if (searchByTitle && searchByDirector) {
+            return findMany(SEARCH_BY_TITLE_AND_DIRECTOR, searchTerm, searchTerm);
+        } else if (searchByTitle) {
+            return findMany(SEARCH_BY_TITLE, searchTerm);
+        } else if (searchByDirector) {
+            return findMany(SEARCH_BY_DIRECTOR, searchTerm);
+        } else {
+            return List.of();
+        }
     }
 }

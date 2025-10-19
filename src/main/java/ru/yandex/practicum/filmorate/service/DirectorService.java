@@ -11,7 +11,6 @@ import ru.yandex.practicum.filmorate.mapper.DirectorMapper;
 import ru.yandex.practicum.filmorate.model.Director;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -22,12 +21,6 @@ public class DirectorService {
         return directorRepository.getDirectorById(id)
                 .map(DirectorMapper::mapToDto)
                 .orElseThrow(() -> new NotFoundException("Director with id " + id + " not found"));
-    }
-
-    public List<DirectorDto> getDirectorsByIds(List<Integer> ids) {
-        return directorRepository.getDirectorsByIds(ids).stream()
-                .map(DirectorMapper::mapToDto)
-                .collect(Collectors.toList());
     }
 
     public List<DirectorDto> findAll() {
@@ -54,7 +47,9 @@ public class DirectorService {
     public void deleteDirector(int id) {
         directorRepository.getDirectorById(id)
                 .orElseThrow(() -> new NotFoundException("Director with id " + id + " not found"));
-
+        if (directorRepository.isDirectorUsedInFilms(id)) {
+            throw new IllegalStateException("Cannot delete director - used in films");
+        }
         directorRepository.deleteDirector(id);
     }
 }
