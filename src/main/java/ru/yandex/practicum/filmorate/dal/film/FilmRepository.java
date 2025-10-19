@@ -16,7 +16,9 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Qualifier("h2FilmStorage")
 @Repository
@@ -118,6 +120,7 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
 
     private static final String MERGE_DIRECTOR_TO_FILM = "MERGE INTO film_director (director_id, film_id) VALUES(?, ?)";
     private static final String DELETE_ALL_DIRECTORS_FROM_FILM = "DELETE FROM film_director WHERE film_id = ?";
+    private static final String GET_LIKED_FILM_IDS_BY_USER = "SELECT film_id FROM likes WHERE user_id = ?";
 
     private static final String SEARCH_BY_TITLE = """
             SELECT fl.*, fg.GENRE_ID, rte.NAME as MPANAME, g.NAME as GNAME, fd.director_id, d.name as director_name
@@ -169,6 +172,11 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
 
     public FilmRepository(JdbcTemplate jdbc, RowMapper<Film> mapper, ResultSetExtractor<List<Film>> extractor) {
         super(jdbc, mapper, extractor);
+    }
+
+    @Override
+    public Set<Integer> getLikedFilmIdsByUser(int userId) {
+        return new HashSet<>(jdbc.queryForList(GET_LIKED_FILM_IDS_BY_USER, Integer.class, userId));
     }
 
     @Override
