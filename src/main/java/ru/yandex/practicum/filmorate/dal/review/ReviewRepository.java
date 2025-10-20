@@ -78,12 +78,11 @@ public class ReviewRepository extends BaseRepository<Review> {
         return review;
     }
 
-    public Review updateReview(Review review) {
+    public void updateReview(Review review) {
         update(UPDATE,
                 review.getContent(),
                 review.isPositive() ? 1 : 0,
                 review.getId());
-        return review;
     }
 
     public void deleteReview(int id) {

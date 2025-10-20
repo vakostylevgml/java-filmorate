@@ -19,7 +19,6 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -53,11 +52,15 @@ public class ReviewService {
     }
 
     public ReviewDto updateReview(UpdatedReviewRequest request) {
+        //check is review exists
         Review old = reviewRepository.getReviewById(request.getReviewId()).orElseThrow(
                 () -> new NotFoundException("Review with id " + request.getReviewId() + " not found"));
-        Review review = reviewRepository.updateReview(ReviewMapper.mapToReview(request));
-        userStorage.addEvent(old.getUserId(), review.getId(), EventType.REVIEW, OperationType.UPDATE);
-        return ReviewMapper.mapToDto(review);
+
+        //perform update
+        reviewRepository.updateReview(ReviewMapper.mapToReview(request));
+
+        userStorage.addEvent(old.getUserId(), old.getId(), EventType.REVIEW, OperationType.UPDATE);
+        return ReviewMapper.mapToDto(reviewRepository.getReviewById(old.getId()).get());
     }
 
     public void deleteReview(int id) {
