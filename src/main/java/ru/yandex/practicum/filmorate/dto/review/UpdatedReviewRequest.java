@@ -12,12 +12,6 @@ public class UpdatedReviewRequest {
     @NotNull
     private Integer reviewId;
 
-    @NotNull
-    private Integer userId;
-
-    @NotNull
-    private Integer filmId;
-
     @NotBlank
     @Size(max = 255, message
             = "Review content must not exceed 255 characters")

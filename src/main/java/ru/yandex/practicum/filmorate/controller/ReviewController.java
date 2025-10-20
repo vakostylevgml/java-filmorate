@@ -26,7 +26,7 @@ public class ReviewController {
 
     @PutMapping
     public ReviewDto updateReview(@Valid @RequestBody UpdatedReviewRequest request) {
-        log.info("Update review with id {}", request);
+        log.warn("Update review with request: {}", request);
         return reviewService.updateReview(request);
     }
 

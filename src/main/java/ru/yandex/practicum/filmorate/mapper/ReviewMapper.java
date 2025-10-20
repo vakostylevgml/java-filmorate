@@ -27,8 +27,6 @@ public class ReviewMapper {
     public static Review mapToReview(UpdatedReviewRequest request) {
         return Review.builder()
                 .id(request.getReviewId())
-                .userId(request.getUserId())
-                .filmId(request.getFilmId())
                 .content(request.getContent())
                 .isPositive(request.getIsPositive()).build();
     }
