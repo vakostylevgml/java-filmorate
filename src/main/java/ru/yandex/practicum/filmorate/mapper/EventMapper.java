@@ -7,6 +7,7 @@ public class EventMapper {
     public static EventDto mapToDto(Event event) {
         return EventDto.builder()
                 .userId(event.getUserId())
+                .eventId(event.getId())
                 .entityId(event.getEntityId())
                 .operation(event.getOperation())
                 .eventType(event.getEventType())

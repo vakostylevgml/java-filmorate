@@ -6,6 +6,7 @@ import lombok.Data;
 @Data
 @Builder
 public class EventDto {
+    private int eventId;
     private int userId;
     private int entityId;
     private long timestamp;
