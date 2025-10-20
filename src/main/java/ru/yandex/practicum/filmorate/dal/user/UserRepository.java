@@ -29,17 +29,25 @@ public class UserRepository extends BaseRepository<User> implements UserStorage 
             " birthday = ?  WHERE id = ?";
     private static final String DELETE_BY_ID = "DELETE FROM users WHERE id = ?";
 
-    private static final String GET_FRIENDS = "SELECT * FROM users WHERE id IN (" +
-            "SELECT user_id_2 FROM friends WHERE user_id_1 = ?)";
+    private static final String GET_FRIENDS = """
+    SELECT u.id, u.email, u.login, u.name, u.birthday
+    FROM friends f
+    JOIN users u ON u.id = f.user_id_2
+    WHERE f.user_id_1 = ?
+    ORDER BY u.id ASC
+    """;
     private static final String ADD_FRIEND = "INSERT INTO friends(user_id_1, user_id_2) VALUES (?, ?)";
     private static final String DELETE_FRIEND = "DELETE FROM friends WHERE user_id_1 = ? AND user_id_2 = ?";
     private static final String DELETE_USER_FROM_ALL_FRIENDS = "DELETE FROM friends WHERE user_id_1 = ? OR user_id_2 = ?";
     private static final String COMMON_FRIENDS = """
-            SELECT u.* FROM friends AS user_fr
-            INNER JOIN friends AS friend_fr ON friend_fr.user_id_2 = user_fr.user_id_2
-            INNER JOIN users AS u ON u.id = friend_fr.user_id_2
-            WHERE user_fr.user_id_1 = ? AND friend_fr.user_id_1 = ?
-            AND user_fr.user_id_2 <> friend_fr.user_id_1 AND friend_fr.user_id_1 <> user_fr.user_id_1""";
+    SELECT u.* FROM friends AS user_fr
+    INNER JOIN friends AS friend_fr ON friend_fr.user_id_2 = user_fr.user_id_2
+    INNER JOIN users AS u ON u.id = friend_fr.user_id_2
+    WHERE user_fr.user_id_1 = ? AND friend_fr.user_id_1 = ?
+      AND user_fr.user_id_2 <> friend_fr.user_id_1
+      AND friend_fr.user_id_1 <> user_fr.user_id_1
+    ORDER BY u.id
+    """;
 
     private static final String ADD_EVENT_QUERY = "INSERT INTO events(e_timestamp, user_id, " +
             "operation, type, entity_id) VALUES (?, ?, ?, ?, ?)";
