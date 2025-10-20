@@ -20,7 +20,9 @@ public class FilmDto {
     private String description;
     private LocalDate releaseDate;
     private int duration;
-    private LinkedHashSet<Genre> genres;
+
+    @Builder.Default
+    private LinkedHashSet<Genre> genres = new LinkedHashSet<>();
 
     @JsonProperty("mpa")
     private MpaDto mpa;

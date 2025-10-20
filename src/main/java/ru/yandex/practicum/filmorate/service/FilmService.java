@@ -38,9 +38,10 @@ public class FilmService {
         Film existing = filmStorage.getFilmById(updatedFilmRequest.getId());
 
         //perform update
-        Film updated = FilmMapper.mapToFilm(updatedFilmRequest);
-        filmStorage.updateFilm(updated);
-        return FilmMapper.mapToDto(updated);
+        filmStorage.updateFilm(FilmMapper.mapToFilm(updatedFilmRequest));
+
+        //return updated
+        return FilmMapper.mapToDto(filmStorage.getFilmById(updatedFilmRequest.getId()));
     }
 
     public void deleteFilm(int filmId) {
