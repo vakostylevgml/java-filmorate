@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dal.BaseRepository;
 import ru.yandex.practicum.filmorate.model.Review;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,14 +19,14 @@ public class ReviewRepository extends BaseRepository<Review> {
     private static final String DELETE_REVIEW = "DELETE FROM reviews WHERE id = ?";
 
     private static final String GET_REVIEW_BY_ID = """
-            SELECT r.*, SUM(rld.like_dislike) AS ld FROM REVIEWS AS r
+            SELECT r.*, COALESCE(SUM(rld.like_dislike), 0) AS ld FROM REVIEWS AS r
             LEFT JOIN REVIEW_LIKES_DISLIKES AS rld
             ON rld.review_id = r.id
             GROUP BY r.id
             HAVING r.id = ?;
             """;
     private static final String GET_ALL_REVIEWS_BY_FILM_ID = """
-            SELECT r.*, SUM(rld.like_dislike) AS ld FROM REVIEWS AS r
+            SELECT r.*, COALESCE(SUM(rld.like_dislike), 0) AS ld FROM REVIEWS AS r
             LEFT JOIN REVIEW_LIKES_DISLIKES AS rld
             ON rld.review_id = r.id
             GROUP BY r.id
@@ -35,7 +36,7 @@ public class ReviewRepository extends BaseRepository<Review> {
             """;
 
     private static final String GET_ALL_REVIEWS = """
-            SELECT r.*, SUM(rld.like_dislike) AS ld FROM REVIEWS AS r
+            SELECT r.*, COALESCE(SUM(rld.like_dislike), 0) AS ld FROM REVIEWS AS r
             LEFT JOIN REVIEW_LIKES_DISLIKES AS rld
             ON rld.review_id = r.id
             GROUP BY r.id
