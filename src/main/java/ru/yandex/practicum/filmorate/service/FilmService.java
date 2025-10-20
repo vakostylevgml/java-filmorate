@@ -15,8 +15,7 @@ import ru.yandex.practicum.filmorate.model.event.OperationType;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -110,6 +109,58 @@ public class FilmService {
         String[] searchTypes = by.split(",");
         List<Film> films = filmStorage.searchFilms(query, searchTypes);
         return films.stream()
+                .map(FilmMapper::mapToDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<FilmDto> getRecommendations(int userId) {
+        userStorage.findUser(userId).orElseThrow(() ->
+                new NotFoundException("User with id " + userId + " not found")
+        );
+
+        Set<Integer> targetLiked = filmStorage.getLikedFilmIdsByUser(userId);
+
+        if (targetLiked.isEmpty()) {
+            return List.of();
+        }
+
+        List<User> allUsers = userStorage.findAll().stream()
+                .filter(user -> user.getId() != userId)
+                .toList();
+
+        if (allUsers.isEmpty()) {
+            return List.of();
+        }
+
+        Map<Integer, Integer> commonCount = new HashMap<>();
+        for (User other : allUsers) {
+            Set<Integer> otherLiked = filmStorage.getLikedFilmIdsByUser(other.getId());
+            int common = (int) targetLiked.stream().filter(otherLiked::contains).count();
+            if (common > 0) {
+                commonCount.put(other.getId(), common);
+            }
+        }
+
+        if (commonCount.isEmpty()) {
+            return List.of();
+        }
+
+        int maxCommon = Collections.max(commonCount.values());
+
+        Set<Integer> similarUserIds = commonCount.entrySet().stream()
+                .filter(e -> e.getValue() == maxCommon)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
+
+        Set<Integer> recommendedFilmIds = new HashSet<>();
+        for (int similarId : similarUserIds) {
+            Set<Integer> likedBySimilar = filmStorage.getLikedFilmIdsByUser(similarId);
+            likedBySimilar.removeAll(targetLiked); // убираем уже лайкнутые
+            recommendedFilmIds.addAll(likedBySimilar);
+        }
+
+        return recommendedFilmIds.stream()
+                .map(id -> filmStorage.getFilmById(id))
                 .map(FilmMapper::mapToDto)
                 .collect(Collectors.toList());
     }
