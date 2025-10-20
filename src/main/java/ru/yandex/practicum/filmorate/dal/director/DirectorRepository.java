@@ -57,14 +57,6 @@ public class DirectorRepository extends BaseRepository<Director> {
 
     public void deleteDirector(int id) {
         Integer filmCount = jdbc.queryForObject(COUNT_FILMS_BY_DIRECTOR, Integer.class, id);
-        if (filmCount != null && filmCount > 0) {
-            throw new IllegalStateException("Cannot delete director - used in " + filmCount + " films");
-        }
         delete(DELETE_QUERY, id);
-    }
-
-    public boolean isDirectorUsedInFilms(int directorId) {
-        Integer count = jdbc.queryForObject(COUNT_FILMS_BY_DIRECTOR, Integer.class, directorId);
-        return count != null && count > 0;
     }
 }

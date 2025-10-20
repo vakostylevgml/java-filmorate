@@ -47,9 +47,6 @@ public class DirectorService {
     public void deleteDirector(int id) {
         directorRepository.getDirectorById(id)
                 .orElseThrow(() -> new NotFoundException("Director with id " + id + " not found"));
-        if (directorRepository.isDirectorUsedInFilms(id)) {
-            throw new IllegalStateException("Cannot delete director - used in films");
-        }
         directorRepository.deleteDirector(id);
     }
 }
