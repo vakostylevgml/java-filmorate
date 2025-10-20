@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.dto.event.EventDto;
 import ru.yandex.practicum.filmorate.dto.user.NewUserRequest;
 import ru.yandex.practicum.filmorate.dto.user.UpdatedUserRequest;
 import ru.yandex.practicum.filmorate.dto.user.UserDto;
@@ -73,4 +74,10 @@ public class UserController {
     public Collection<UserDto> getCommonFriends(@PathVariable("id") int id, @PathVariable("otherId") int otherId) {
         return userService.getCommonFriends(id, otherId);
     }
+
+    @GetMapping("/{id}/feed")
+    public Collection<EventDto> getFeed(@PathVariable Integer id) {
+        return userService.getFeed(id);
+    }
+
 }

@@ -3,13 +3,17 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dto.event.EventDto;
 import ru.yandex.practicum.filmorate.dto.user.NewUserRequest;
 import ru.yandex.practicum.filmorate.dto.user.UpdatedUserRequest;
 import ru.yandex.practicum.filmorate.dto.user.UserDto;
 import ru.yandex.practicum.filmorate.except.DuplicateException;
 import ru.yandex.practicum.filmorate.except.NotFoundException;
+import ru.yandex.practicum.filmorate.mapper.EventMapper;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.event.EventType;
+import ru.yandex.practicum.filmorate.model.event.OperationType;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.*;
@@ -74,12 +78,15 @@ public class UserService {
         User user = userStorage.findUser(userId).orElseThrow(() -> new NotFoundException("User with id " + userId + " not found"));
         User friend = userStorage.findUser(friendId).orElseThrow(() -> new NotFoundException("User with id " + userId + " not found"));
         userStorage.addFriend(user.getId(), friend.getId());
+        userStorage.addEvent(user.getId(), friend.getId(), EventType.FRIEND, OperationType.ADD);
+
     }
 
     public void deleteFriend(int userId, int friendId) throws NotFoundException {
         User user = userStorage.findUser(userId).orElseThrow(() -> new NotFoundException("User with id " + userId + " not found"));
         User friend = userStorage.findUser(friendId).orElseThrow(() -> new NotFoundException("User with id " + userId + " not found"));
         userStorage.deleteFriend(user.getId(), friend.getId());
+        userStorage.addEvent(user.getId(), friend.getId(), EventType.FRIEND, OperationType.REMOVE);
     }
 
     public Set<UserDto> getFriends(int id) throws NotFoundException {
@@ -93,6 +100,9 @@ public class UserService {
         return userStorage.getCommonFriends(id1, id2).stream().map(UserMapper::mapToUserDto).collect(Collectors.toSet());
     }
 
-
-
+    public Collection<EventDto> getFeed(int userId) {
+        User user = userStorage.findUser(userId)
+                .orElseThrow(() -> new NotFoundException("User with id " + userId + " not found"));
+        return userStorage.getFeed(user.getId()).stream().map(EventMapper::mapToDto).toList();
+    }
 }
