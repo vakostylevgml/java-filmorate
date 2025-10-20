@@ -46,8 +46,9 @@ public class FilmController {
         return filmService.updateFilm(updatedFilm);
     }
 
-    @DeleteMapping
-    public void delete(@Valid @RequestBody int filmId) {
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable("id") @Positive int filmId) {
+        log.info("Delete film with id {}", filmId);
         filmService.deleteFilm(filmId);
     }
 
@@ -58,12 +59,36 @@ public class FilmController {
 
     @DeleteMapping("/{id}/like/{userId}")
     public void unLike(@PathVariable("id") int filmId, @PathVariable("userId") int userId) {
-        log.info("UNKIKE CALL");
+        log.info("UNLIKE CALL");
         filmService.unLike(filmId, userId);
     }
 
+    @GetMapping("/common")
+    public List<FilmDto> getCommonFilms(@RequestParam @Positive(message = "User ID must be positive") int userId,
+                                        @RequestParam @Positive(message = "User ID must be positive") int friendId) {
+        log.info("GET /common: receiving common films for ID {} and ID {}", userId, friendId);
+        return filmService.getCommonFilms(userId, friendId);
+    }
+
+    @GetMapping("/director/{directorId}")
+    public List<FilmDto> getFilmsByDirector(
+            @PathVariable("directorId") int directorId,
+            @RequestParam String sortBy) {
+        return filmService.getFilmsByDirector(directorId, sortBy);
+    }
+
     @GetMapping("/popular")
-    public List<FilmDto> getPopular(@RequestParam(defaultValue = "10") @Positive int count) {
-        return filmService.getMostLiked(count);
+    public List<FilmDto> getPopular(@RequestParam(defaultValue = "10") @Positive(message = "Count must be positive") int count,
+                                    @RequestParam(required = false) @Positive(message = "GenreId must be positive") Integer genreId,
+                                    @RequestParam(required = false) @Positive(message = "Year must be positive") Integer year) {
+        log.info("GET /popular: receiving popular films");
+        return filmService.getPopularFilmsByParameters(genreId, year, count);
+    }
+
+    @GetMapping("/search")
+    public List<FilmDto> searchFilms(
+            @RequestParam String query,
+            @RequestParam String by) {
+        return filmService.searchFilms(query, by);
     }
 }

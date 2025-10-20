@@ -1,6 +1,9 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.event.Event;
+import ru.yandex.practicum.filmorate.model.event.EventType;
+import ru.yandex.practicum.filmorate.model.event.OperationType;
 
 import java.util.Collection;
 import java.util.List;
@@ -27,4 +30,7 @@ public interface UserStorage {
 
     List<User> getCommonFriends(int userId, int userId2);
 
+    Collection<Event> getFeed(int userId);
+
+    void addEvent(int userId, int entityId, EventType type, OperationType operation);
 }
