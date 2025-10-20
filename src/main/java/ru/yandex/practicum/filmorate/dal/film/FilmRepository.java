@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.dal.film;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
@@ -20,7 +19,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Qualifier("h2FilmStorage")
 @Repository
 public class FilmRepository extends BaseRepository<Film> implements FilmStorage {
     private static final Logger log = LoggerFactory.getLogger(FilmRepository.class);
@@ -275,26 +273,15 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
     }
 
     public List<Film> getFilmsByDirector(int directorId, String sortBy) {
-        String orderClause;
-        switch (sortBy.toLowerCase()) {
-            case "year":
-                orderClause = "fl.release_date";
-                break;
-            case "likes":
-                orderClause = """
-                        (SELECT COUNT(*) FROM likes WHERE film_id = fl.id) DESC,
-                        fl.release_date DESC
-                        """;
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid sort parameter: " + sortBy);
-        }
+        String orderClause = switch (sortBy.toLowerCase()) {
+            case "year" -> "fl.release_date";
+            case "likes" -> """
+                    (SELECT COUNT(*) FROM likes WHERE film_id = fl.id) DESC,
+                    fl.release_date DESC
+                    """;
+            default -> throw new IllegalArgumentException("Invalid sort parameter: " + sortBy);
+        };
         String query = String.format(GET_FILMS_BY_DIRECTOR, orderClause);
-        return findMany(query, directorId);
-    }
-
-    public List<Film> getFilmsByDirector(int directorId) {
-        String query = String.format(GET_FILMS_BY_DIRECTOR, "fl.id");
         return findMany(query, directorId);
     }
 
