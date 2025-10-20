@@ -34,9 +34,13 @@ public class FilmService {
     }
 
     public FilmDto updateFilm(UpdatedFilmRequest updatedFilmRequest) {
-        Film film = FilmMapper.mapToFilm(updatedFilmRequest);
-        filmStorage.updateFilm(film);
-        return FilmMapper.mapToDto(film);
+        //request film to check it existence, if film doesn't found NFE will be thrown
+        Film existing = filmStorage.getFilmById(updatedFilmRequest.getId());
+
+        //perform update
+        Film updated = FilmMapper.mapToFilm(updatedFilmRequest);
+        filmStorage.updateFilm(updated);
+        return FilmMapper.mapToDto(updated);
     }
 
     public void deleteFilm(int filmId) {
