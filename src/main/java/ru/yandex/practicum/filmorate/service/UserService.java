@@ -89,9 +89,9 @@ public class UserService {
         userStorage.addEvent(user.getId(), friend.getId(), EventType.FRIEND, OperationType.REMOVE);
     }
 
-    public Set<UserDto> getFriends(int id) throws NotFoundException {
+    public List<UserDto> getFriends(int id) throws NotFoundException {
         User user = userStorage.findUser(id).orElseThrow(() -> new NotFoundException("User with id " + id + " not found"));
-        return userStorage.getFriends(id).stream().map(UserMapper::mapToUserDto).collect(Collectors.toSet());
+        return userStorage.getFriends(id).stream().map(UserMapper::mapToUserDto).collect(Collectors.toList());
     }
 
     public Set<UserDto> getCommonFriends(int id1, int id2) throws NotFoundException {
