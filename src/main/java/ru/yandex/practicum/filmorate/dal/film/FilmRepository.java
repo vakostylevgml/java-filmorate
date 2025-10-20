@@ -73,7 +73,7 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
                     WHERE fg2.film_id = fl.id AND fg2.genre_id = ?
                 ))
                 AND (? IS NULL OR EXTRACT(YEAR FROM fl.release_date) = ?)
-            ORDER BY flikes.lksc DESC NULLS LAST, fl.id DESC
+            ORDER BY flikes.lksc DESC NULLS LAST, fl.id ASC
             LIMIT ?
             """;
 
