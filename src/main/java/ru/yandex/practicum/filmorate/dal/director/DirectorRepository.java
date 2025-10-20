@@ -20,7 +20,6 @@ public class DirectorRepository extends BaseRepository<Director> {
     private static final String INSERT_QUERY = "INSERT INTO directors (name) VALUES (?)";
     private static final String UPDATE_QUERY = "UPDATE directors SET name = ? WHERE id = ?";
     private static final String DELETE_QUERY = "DELETE FROM directors WHERE id = ?";
-    private static final String COUNT_FILMS_BY_DIRECTOR = "SELECT COUNT(*) FROM film_director WHERE director_id = ?";
 
     public DirectorRepository(JdbcTemplate jdbc,
                               RowMapper<Director> mapper,
@@ -56,7 +55,6 @@ public class DirectorRepository extends BaseRepository<Director> {
     }
 
     public void deleteDirector(int id) {
-        Integer filmCount = jdbc.queryForObject(COUNT_FILMS_BY_DIRECTOR, Integer.class, id);
         delete(DELETE_QUERY, id);
     }
 }
